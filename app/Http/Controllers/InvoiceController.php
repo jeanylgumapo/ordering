@@ -16,6 +16,16 @@ class InvoiceController extends Controller
     {
         //
     }
+    public function getInvoiceNo(Request $request)
+    {
+        $invoice=new Invoice();
+        $invoice->discount=0;
+        $invoice->tax=0;
+        $invoice->save();
+        $insertedId = $invoice->id;
+        return response()->json($insertedId);
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -67,9 +77,13 @@ class InvoiceController extends Controller
      * @param  \App\Models\Invoice  $invoice
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Invoice $invoice)
+    public function update(Request $request, $id)
     {
-        //
+        $invoice=Invoice::findorFail($id);
+        $invoice->discount=$request->input('discount');
+        $invoice->tax=$request->input('tax');
+        $invoice->save();
+        return response()->json($invoice);
     }
 
     /**

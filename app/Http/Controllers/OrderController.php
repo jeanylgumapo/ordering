@@ -24,7 +24,7 @@ class OrderController extends Controller
      */
     public function create()
     {
-        //
+        
     }
 
     /**
@@ -35,7 +35,12 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $order=new Order();
+        $order->invoice_id=$request->input('invoice_id');
+        $order->item_id=$request->input('item_id');
+        $order->qty=$request->input('qty');
+        $order->save();
+        return response()->json($order);
     }
 
     /**

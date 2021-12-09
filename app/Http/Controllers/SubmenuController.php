@@ -14,7 +14,8 @@ class SubmenuController extends Controller
      */
     public function index()
     {
-        return "hello";
+        $submenu = Submenu::all();
+        return response()->json($submenu);
     }
 
     /**

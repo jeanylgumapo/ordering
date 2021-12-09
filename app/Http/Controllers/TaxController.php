@@ -14,7 +14,8 @@ class TaxController extends Controller
      */
     public function index()
     {
-        //
+        $taxes = Tax::all();
+        return response()->json($taxes);
     }
 
     /**

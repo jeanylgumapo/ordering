@@ -4,5 +4,10 @@ $(document).ready(function(){
 //     // bonus: add a placeholder
 //     $('.combobox').attr('placeholder', 'For example, start typing "Pennsylvania"');
 //   });
-    alert("test");
+    // alert("test");
+    function fetchData(){
+    fetch('/api/items');
+    }
+
+    fetchData();
   });

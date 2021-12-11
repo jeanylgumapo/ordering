@@ -69,32 +69,7 @@
                         <p class="totalprice"></p>
                     </div>
                   </div>
-                  <div class="row">
-                    <div class="col-10 text-right">
-                        Coupon
-                    </div>
-                    <div class="col-2 text-right">
-                        10%
-                  </div>
-                </div>
-                <div class="row">
-                    <div class="col-10 text-right">
-                        Tax
-                    </div>
-                    <div class="col-2 text-right">
-                        10%
-                        <hr/>
-                  </div>
-                </div>
-                    <div class="row">
-                        <div class="col-10 text-right">
-                        <b> Net Price</b>
-                        </div>
-                        <div class="col-2 text-right">
-                        <b> 24.00</b>
-                    </div>
-                    </div>
-                </div>
+                 </div>
                 </div>
                 <div class="card-footer text-muted  justify-content-end">
                     <!-- Button trigger modal -->
@@ -146,6 +121,7 @@
                         <div class="col-6">
                           <div class="input-group mb-3">
                             <input id="txtcode" type="text" class="form-control" placeholder="Coupon Code" >
+                            <input id="couponid" type="hidden">
                             <button id="code" class="btn btn-outline-secondary" type="button" id="button-addon2">Find</button>
                             <i>less</i>(<span id="disc"></span>%)
                           </div>
@@ -165,7 +141,7 @@
                     </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="close" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" id="pay" class="btn btn-primary">Pay</button>
                     </div>
                 </div>

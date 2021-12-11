@@ -39,7 +39,7 @@ class OrderController extends Controller
     {
         $order=new Order();
         $order->invoice_id=$request->input('invoice_id');
-        $order->item_id=$request->input('item_id');
+        $order->item=$request->input('item');
         $order->qty=$request->input('qty');
         $order->save();
         return response()->json(['status'=>200, 'message'=>'Saved']);
@@ -74,9 +74,10 @@ class OrderController extends Controller
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Order $order)
+    public function update(Request $request, $or_id)
     {
-        //
+        $order=Order::where('orid', '=', $or_id)->update(['invoice_id' => $request->input('invoice_id')]);
+        return response()->json(['status'=>200, 'message'=>'Saved']);
     }
 
     /**
@@ -85,17 +86,17 @@ class OrderController extends Controller
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($orid)
     {
-        $order=Order::findorFail($id);
-        if($order->delete()){
-            return response()->json($order);
-        }
+        $$order=DB::table('orders')->where('orid', $orid)->delete();
+            return response()->json(['status'=>200, 'message'=>'Saved']);
+        
     }
     public function getOrders(){
         $order = DB::table('orders')
-            ->join('submenus','submenus.id','=','orders.item_id' )
-            ->where("invoice_id", null)->get();
+            ->select('orders.orid AS orid','orders.invoice_id as invoice_id','orders.item as item', 'orders.qty as qty', 'submenus.id as id', 'submenus.item_name as item_name', 'submenus.price as price')
+            ->join('submenus','submenus.id','=','orders.item' )
+            ->where("orders.invoice_id", null)->get();
         return response()->json(['order'=>$order]);
 
     }

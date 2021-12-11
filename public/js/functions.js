@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var invoiceNo=0;
     var couponid=0;
-    var getItems=[];
+    var orderid=[];
     var discount=0;
     var netPrice=0;
     var tax=0;
@@ -10,8 +10,6 @@ $(document).ready(function(){
     displayOrders()
     var totalQty=0;
     var totalPrice=0;
-    // getInvoiceNo();
-
     function fetchItem(){
       $.ajax({
         type:'GET',
@@ -39,7 +37,7 @@ $(document).ready(function(){
             e.preventDefault();
         var data={
             'invoice_id':null,
-            'item_id': $('.itemcbo option:selected').val(),
+            'item': $('.itemcbo option:selected').val(),
             'qty': $('.itemtxtbox').val(),
         }
 
@@ -62,6 +60,7 @@ $(document).ready(function(){
     });
 
     function displayOrders(){
+      orderid=[];
         totalQty=0;
         totalPrice=0;
         $("#orders").html("");
@@ -73,12 +72,13 @@ $(document).ready(function(){
           url:'/api/order',
           dataType:'JSON',
           success:function(response){
-          $.each(response.order, function(key, item){
+          $.each(response.order, function(key, value){
+            orderid.push(value.orid);
+            
                count++;
-             $('#orders').append('<tr><td>'+count+'</td><td>'+item.item_name+'</td><td class="text-right">'+item.price+'</td><td class="text-right">'+item.qty+'</td><td  class="text-right">'+(item.price*item.qty)+'</td></tr>')
-             totalQty+=item.qty;
-             totalPrice+=(item.price*item.qty);
-
+             $('#orders').append('<tr><td>'+count+'</td><td>'+value.item_name+'</td><td class="text-right">'+value.price+'</td><td class="text-right">'+value.qty+'</td><td  class="text-right">'+(value.price*value.qty)+'</td><td><button type="button" data-id="'+value.orid+'" class="btn btn-danger delItem">x</button></td></tr>')
+             totalQty+=value.qty;
+             totalPrice+=(value.price*value.qty);
            });
            console.log(totalQty);
            $("#qty").text(totalQty);
@@ -86,53 +86,71 @@ $(document).ready(function(){
           }
         });
       } 
+      $(document).on('click', '.delItem', function(e){
+        e.preventDefault();
+        // alert($(this).attr("data-id"));
+      $.ajaxSetup({
+          headers:{
+              'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
+          }
+      });
+
+      $.ajax({
+          type:'DELETE',
+          url:'/api/order/'+$(this).attr("data-id"),
+          dataType:'json',
+          success:function (response) { 
+              console.log("deleted");
+          }
+      });
+      location.reload(true);
+
+      });
       $(document).on('click', '#payOrder', function(e){
         e.preventDefault();
         tax=0;
         addTax=0;
-
-
-
         $.ajax({
           type:'GET',
           url:'/api/tax',
           dataType:'JSON',
           success:function(response){
            $.each(response, function(key, value){
-            $('#tax').append('<li>'+value.tax_type+' '+(value.percentage*100)+'%</li>')
+            $('#tax').append('<li>'+value.tax_type+' '+(value.percentage*100)+'%</li><input type="hidden" id="taxid" value="'+value.id+'">')
             $('#addTax').append('<li>'+(value.percentage*totalPrice)+'</li>')
             tax=value.percentage*totalPrice;
+            
            });
            addTax=tax+totalPrice;
+          $(".gross").text(addTax);
+           totalPrice=addTax;
+           console.log('total price:'+totalPrice.toFixed(2));
+           $("#disc").text(0);
+           $("#discountPrice").text(addTax.toFixed(2));
+           $("#netprice").text(addTax.toFixed(2));
           }
+          
         });
-
-        $(".GROSS").text(addTax);
-       // getTax();
-        //  $("#discountPrice").text(totalPrice);
-        // discountPrice=tax;
-        // $("#netprice").text((discountPrice+tax));
-        $("#discountPrice").text(totalPrice);
-        console.log(totalPrice);
-        //get discount price
-        $("#discountPrice").text(totalPrice);
-            netPrice=totalPrice;
-
     });
+    $(document).on('click', '#close', function(e){
+      e.preventDefault();
+      location.reload(true);
+    });
+      
       $(document).on('click', '#code', function(e){
           var getCode=$('#txtcode').val();
           couponid=0;
           discount=0;
           netPrice=0;
         e.preventDefault();
-        // alert('found');
+
         $.ajax({
             type:'GET',
             url:'/api/coupon',
             dataType:'JSON',
             success:function(response){
              $.each(response, function(key, value){
-            //    $('#items').append('<option value="'+item.id+'">'+item.item_name+'</option>')
+
             if(value.code==getCode){
                 discount=value.discount;
                 $("#disc").text(value.discount*100);
@@ -143,7 +161,7 @@ $(document).ready(function(){
                 $("#disc").text(0);
                 couponid=null;
             }
-            console.log(value);
+
              });
              
              if(discount==0){
@@ -152,14 +170,63 @@ $(document).ready(function(){
              }
              else{
              $("#discountPrice").text(totalPrice-(totalPrice*discount));
-             netPrice=totalPrice-(totalPrice*discount);
+             netPrice=(totalPrice-(totalPrice*discount)).toFixed(2);
              }
+             $("#netprice").text(netPrice);
             }
           });
 
     });
-    function getTax(){
-     
-    }
-             
+    $(document).on('click', '#pay', function(e){
+      e.preventDefault();
+      
+  var data={
+      'discount':couponid,
+      'tax': $('#taxid').val(),
+   }
+
+  $.ajaxSetup({
+      headers:{
+          'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
+      }
+  });
+
+  $.ajax({
+      type:'POST',
+      url:'/api/invoice',
+      data:data,
+      dataType:'json',
+      success:function (response) { 
+
+        $.each(orderid, function (i, id) {
+            updateOrder(response.insertedId,id);
+        });
+       }
+  });
+  location.reload(true);
+
+});
+
+  function updateOrder($invoice_id, $id){
+  
+    var data={
+          'invoice_id':$invoice_id,
+      }
+
+      $.ajaxSetup({
+          headers:{
+              'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
+          }
+      });
+
+      $.ajax({
+          type:'GET',
+          url:'/api/updateorder/'+$id,
+          data:data,
+          dataType:'json',
+          success:function (response) { 
+              console.log("saved");
+          }
+      });
+  }           
 });

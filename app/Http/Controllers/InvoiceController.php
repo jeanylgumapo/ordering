@@ -34,7 +34,7 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -45,7 +45,12 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $invoice=new Invoice();
+        $invoice->discount=$request->input('discount');
+        $invoice->tax=$request->input('tax');
+        $invoice->save();
+        $insertedId = $invoice->id;
+        return response()->json(['status'=>200, 'message'=>'Saved', 'insertedId'=>$insertedId]);
     }
 
     /**

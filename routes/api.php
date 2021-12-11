@@ -27,5 +27,6 @@ Route::get('/tax', [TaxController::class, 'index']);
 Route::get('/coupon', [CouponController::class, 'index']);
 Route::get('/invoiceno', [InvoiceController::class, 'getInvoiceNo']);
 Route::post('/order', [OrderController::class, 'store']);
+Route::get('/order', [OrderController::class, 'getOrders']);
 Route::put('order/{id}',[OrderController::class, 'update']);
 Route::delete('order/{id}',[OrderController::class, 'destroy']);

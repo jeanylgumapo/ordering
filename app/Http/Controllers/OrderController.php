@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -14,7 +15,8 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $order = Order::all();
+        return response()->json(['order'=>$order]);
     }
 
     /**
@@ -40,7 +42,7 @@ class OrderController extends Controller
         $order->item_id=$request->input('item_id');
         $order->qty=$request->input('qty');
         $order->save();
-        return response()->json($order);
+        return response()->json(['status'=>200, 'message'=>'Saved']);
     }
 
     /**
@@ -89,5 +91,12 @@ class OrderController extends Controller
         if($order->delete()){
             return response()->json($order);
         }
+    }
+    public function getOrders(){
+        $order = DB::table('orders')
+            ->join('submenus','submenus.id','=','orders.item_id' )
+            ->where("invoice_id", null)->get();
+        return response()->json(['order'=>$order]);
+
     }
 }
